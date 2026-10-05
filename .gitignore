@@ -1,0 +1,18 @@
+
+# Ignorar credenciais e ficheiros de ambiente
+.env
+credentials.json
+backend/credentials.json
+**/env/
+**/venv/
+
+# Ambiente Virtual e cache do Python
+venv/
+env/
+__pycache__/
+*.pyc
+*.pyo
+
+# Ficheiros do Sistema
+.DS_Store
+Thumbs.db
