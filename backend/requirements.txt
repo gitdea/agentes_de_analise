@@ -12,3 +12,4 @@ pdf2image
 pillow
 psycopg[binary]
 gspread
+groq
