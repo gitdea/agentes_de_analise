@@ -13,3 +13,4 @@ pillow
 psycopg[binary]
 gspread
 groq
+python-multipart
