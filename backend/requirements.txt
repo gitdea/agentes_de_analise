@@ -10,3 +10,4 @@ requests
 pytesseract
 pdf2image
 pillow
+psycopg[binary]

@@ -1,13 +1,19 @@
 
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
-    GROQ_API_KEY: str
-    TESSERACT_CMD: str = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+    database_url: str | None = None
+    groq_api_key: str | None = None
+    
+    # Garante compatibilidade total caso algum agente chame em maiúsculas
+    @property
+    def GROQ_API_KEY(self):
+        return self.groq_api_key
 
-    class Config:
-        env_file = ".env"
-        env_file_encoding = "utf-8"
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        extra="ignore",
+        case_insensitive=True
+    )
 
-# Instância global das configurações para usar em todo o projeto
 settings = Settings()
