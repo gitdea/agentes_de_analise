@@ -19,9 +19,10 @@ Este projeto nasceu para facilitar a nossa vida na hora de ler, analisar e extra
 
 ---
 
-## 🚀 Teste a Aplicação em Tempo Real
-Clique no link abaixo para acessar a plataforma e testar o leitor inteligente:
-👉 [Acessar o Leitor Inteligente de Documentos](https://nc6glffthdanpfvm739guz.streamlit.app/)
+## Teste a Aplicação em Tempo Real
 
+ **aplicação online:** [Clica aqui para testar](https://nc6glffthdanpfvm739guz.streamlit.app/)
+ 
 ---
+
 *Projeto construído, depurado e colocado no ar com muita resiliência, código e chocolates!*
