@@ -95,15 +95,15 @@ if st.button("Executar Análise com IA"):
             files = {"file": (uploaded_file.name, uploaded_file.getvalue(), "application/pdf")}
             data = {"question": user_question}
             
-            # Obtém a URL da API (prioriza as Secrets do Streamlit Cloud, depois variáveis de ambiente, depois localhost)
+            # Obtém a URL da API (verifica BACKEND_URL nas secrets, depois API_URL, ou usa o Render como padrão)
             try:
-                API_URL = st.secrets.get("API_URL", os.getenv("API_URL", "http://127.0.0.1:8000"))
+                API_URL = st.secrets.get("BACKEND_URL", st.secrets.get("API_URL", os.getenv("BACKEND_URL", "https://agentes-de-analise.onrender.com")))
             except Exception:
-                API_URL = os.getenv("API_URL", "http://127.0.0.1:8000")
+                API_URL = os.getenv("BACKEND_URL", "https://agentes-de-analise.onrender.com")
             
             try:
-                # Realiza a chamada HTTP para o backend FastAPI
-                response = requests.post(f"{API_URL}/documents/analyze", files=files, data=data)
+                # Realiza a chamada HTTP para o backend FastAPI no Render
+                response = requests.post(f"{API_URL}/documents/analyze", files=files, data=data, timeout=120)
                 
                 if response.status_code == 200:
                     result = response.json()
