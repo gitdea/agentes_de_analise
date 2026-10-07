@@ -1,6 +1,8 @@
 
 import io
 import pypdf
+import pytesseract
+from pdf2image import convert_from_bytes
 from groq import Groq
 from src.infrastructure.config import settings
 
@@ -8,20 +10,33 @@ class AgentOrchestrator:
     @staticmethod
     def extract_text_from_pdf(file_bytes: bytes) -> str:
         """
-        Método estático responsável por extrair todo o texto legível de um arquivo PDF
-        a partir de seus bytes, utilizando a biblioteca pypdf.
+        Extrai texto de um PDF. Tenta primeiro texto nativo (pypdf). 
+        Se não encontrar texto (ex: documento digitalizado ou imagem), 
+        executa OCR automaticamente via pdf2image e pytesseract.
         """
         text = ""
+        # 1. Tenta extração de texto nativo
         try:
-            # Lê o conteúdo binário do PDF em memória
             pdf_reader = pypdf.PdfReader(io.BytesIO(file_bytes))
-            # Itera por todas as páginas do documento acumulando o texto extraído
             for page in pdf_reader.pages:
                 extracted = page.extract_text()
                 if extracted:
                     text += extracted + "\n"
         except Exception as e:
             print(f"Erro ao ler PDF com pypdf: {e}")
+
+        # 2. Se o PDF não tiver texto nativo (scans/imagens), aplica OCR
+        if not text.strip():
+            print("⚠️ PDF sem camada de texto nativa detetada. A iniciar OCR (Pytesseract)...")
+            try:
+                # Converte o PDF em imagens página por página
+                images = convert_from_bytes(file_bytes)
+                for i, image in enumerate(images):
+                    ocr_text = pytesseract.image_to_string(image, lang='por+eng')
+                    text += f"\n--- Página {i+1} (OCR) ---\n" + ocr_text + "\n"
+            except Exception as ocr_error:
+                print(f"❌ Erro ao processar OCR com Tesseract: {ocr_error}")
+
         return text
 
     @staticmethod
@@ -34,10 +49,10 @@ class AgentOrchestrator:
         print("🤖 [ORQUESTRADOR] Iniciando fluxo multiagente...")
         print("==============================================")
 
-        # Extrai o texto bruto do PDF enviado
+        # Extrai o texto bruto do PDF (com suporte a OCR de retaguarda)
         raw_text = AgentOrchestrator.extract_text_from_pdf(file_bytes)
         if not raw_text.strip():
-            raise Exception("Não foi possível extrair texto legível do PDF.")
+            raise Exception("Não foi possível extrair texto legível do PDF nem por OCR.")
 
         # Inicializa o cliente da Groq e define o modelo de linguagem utilizado
         client = Groq(api_key=str(settings.GROQ_API_KEY))
@@ -61,7 +76,7 @@ class AgentOrchestrator:
             print("✅ [Agente 1: Extrator] Concluído!")
 
             # AGENTE 2: VALIDADOR / AUDITOR 
-            print("🛡️️ [Agente 2: Validador] Auditando e verificando a consistência...")
+            print("🛡 [Agente 2: Validador] Auditando e verificando a consistência...")
             prompt_validate = f"""
             Você é um agente auditor rigoroso. Revise os dados extraídos abaixo pelo Agente 1, verifique se há inconsistências ou dados em falta, e prepare um resumo validado:
             ---
