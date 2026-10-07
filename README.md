@@ -1,24 +1,30 @@
-# Agentes de Análise de Documentos 
+# Agentes de Análise de Documentos
 
-Este projeto nasceu para facilitar a nossa vida na hora de ler, analisar e extrair informações de documentos,como PDFs e imagens. Juntámos inteligência artificial, recuperação de contexto e bases de dados para criar um sistema inteligente que faz o trabalho duro por nós.
+Este projeto nasceu para facilitar a leitura e a análise de documentos em PDF. Você envia o arquivo, faz uma pergunta e recebe a resposta com base no conteúdo do documento. Para isso, combinei inteligência artificial, OCR e banco de dados em um sistema que guarda o histórico de cada análise.
+
+> Demonstração pública: não envie documentos com dados pessoais ou sigilosos. Os arquivos, as perguntas e as respostas ficam registrados.
 
 ## O que este projeto faz?
-* **Análise Inteligente com Agentes:** Usa múltiplos agentes de IA para processar documentos, extrair dados complexos e tomar decisões automatizadas.
-* **OCR Avançado:** Consegue extrair texto mesmo de imagens e PDFs digitalizados onde o texto comum não é selecionável.
-* **Integração com Google Sheets:** Envia e organiza os resultados obtidos automaticamente para planilhas (através do `gspread`).
-* **Registo e Persistência:** Guarda dados e históricos de forma segura.
+* **Análise com Agentes de IA:** três agentes trabalham em sequência (Extrator, Validador e Analista) para extrair os dados do documento, conferir a consistência e responder à sua pergunta.
+* **OCR para PDFs escaneados:** se o PDF não tem texto selecionável, o sistema aplica OCR automaticamente e lê o conteúdo das páginas.
+* **Integração com Google Sheets:** cada análise é adicionada automaticamente a uma planilha (através do `gspread`).
+* **Registro e Persistência:** o histórico (arquivo, pergunta e resposta) é salvo em um banco PostgreSQL.
+* **Testes automatizados:** testes com `pytest` validam as regras de entrada da API.
 
-## O que corre por trás dos bastidores? (Tecnologias)
-* **Python & FastAPI** — O coração rápido e eficiente da nossa API.
-* **CrewAI, OpenAI & Groq** — O motor de inteligência artificial que alimenta os nossos agentes.
-* **Neon (PostgreSQL)** — A nossa base de dados na nuvem, rápida e segura.
-* **Pytesseract, PDF2Image, Pypdf & Pillow** — O conjunto de ferramentas para OCR e processamento de imagem/PDF.
-* **Gspread** — A ponte mágica com o Google Sheets.
-* **Render** — Onde a nossa aplicação está hospedada e a voar a 100%!
+## Quais tecnologias foram usadas?
+* **Python e FastAPI:** a API que recebe o PDF e a pergunta.
+* **Streamlit:** a interface para enviar o documento e ver a resposta.
+* **Groq:** o modelo de linguagem (LLM) usado pelos três agentes, via API.
+* **Neon (PostgreSQL) e SQLAlchemy:** o banco de dados na nuvem e o acesso a ele.
+* **Pytesseract, PDF2Image e Pypdf:** leitura do PDF e OCR.
+* **Gspread:** a integração com o Google Sheets.
+* **Pytest:** os testes automatizados.
+* **Render:** onde a API está publicada.
 
 ---
 
 ## Teste a Aplicação em Tempo Real
+
 
  **aplicação online:** [Clica aqui para testar](https://nc6glffthdanpfvm739guz.streamlit.app/)
  
