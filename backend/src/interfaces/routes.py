@@ -1,5 +1,6 @@
 
 import os
+import json
 import gspread
 from datetime import datetime
 from fastapi import APIRouter, HTTPException, UploadFile, File, Form
@@ -40,22 +41,32 @@ def salvar_no_neon(nome_ficheiro: str, questao: str, resumo: str):
 def salvar_no_google_sheets(nome_entidade: str, detalhes: str, resumo: str):
     """
     Função para gravar automaticamente os dados no Google Sheets (CRM).
+    Suporta leitura via Variável de Ambiente (Render) ou ficheiro local.
     """
     try:
-        current_dir = os.path.dirname(os.path.abspath(__file__)) # src/interfaces
-        project_root = os.path.dirname(os.path.dirname(os.path.dirname(current_dir))) # raiz
+        # 1. Tentar carregar através de uma variável de ambiente no Render (Conteúdo do JSON em texto)
+        google_creds_json = os.getenv("GOOGLE_CREDENTIALS_JSON")
         
-        path_backend = os.path.join(project_root, "backend", "credentials.json")
-        path_root = os.path.join(project_root, "credentials.json")
-        
-        if os.path.exists(path_backend):
-            cred_path = path_backend
-        elif os.path.exists(path_root):
-            cred_path = path_root
+        if google_creds_json:
+            creds_dict = json.loads(google_creds_json)
+            gc = gspread.service_account_from_dict(creds_dict)
         else:
-            cred_path = "credentials.json"
+            # 2. Fallback para ficheiro local (para desenvolvimento no PC)
+            current_dir = os.path.dirname(os.path.abspath(__file__)) # src/interfaces
+            project_root = os.path.dirname(os.path.dirname(os.path.dirname(current_dir))) # raiz
+            
+            path_backend = os.path.join(project_root, "backend", "credentials.json")
+            path_root = os.path.join(project_root, "credentials.json")
+            
+            if os.path.exists(path_backend):
+                cred_path = path_backend
+            elif os.path.exists(path_root):
+                cred_path = path_root
+            else:
+                cred_path = "credentials.json"
 
-        gc = gspread.service_account(filename=cred_path)
+            gc = gspread.service_account(filename=cred_path)
+
         sh = gc.open("CRM de Documentos")
         worksheet = sh.sheet1
         
