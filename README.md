@@ -5,7 +5,6 @@ Este projeto nasceu para facilitar a nossa vida na hora de ler, analisar e extra
 ## O que este projeto faz?
 * **Análise Inteligente com Agentes:** Usa múltiplos agentes de IA para processar documentos, extrair dados complexos e tomar decisões automatizadas.
 * **OCR Avançado:** Consegue extrair texto mesmo de imagens e PDFs digitalizados onde o texto comum não é selecionável.
-* **RAG (Retrieval-Augmented Generation):** Permite consultar e cruzar informações dos documentos com uma base de conhecimento para respostas muito mais precisas.
 * **Integração com Google Sheets:** Envia e organiza os resultados obtidos automaticamente para planilhas (através do `gspread`).
 * **Registo e Persistência:** Guarda dados e históricos de forma segura.
 
