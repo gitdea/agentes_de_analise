@@ -11,14 +11,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     poppler-utils \
     && rm -rf /var/lib/apt/lists/*
 
-# Copiar os ficheiros de dependências
-COPY backend/requirements.txt ./backend/requirements.txt
+# Copiar todo o projeto para dentro do container
+COPY . /app
 
-# Instalar as dependências do Python
+# Instalar as dependências do Python a partir do backend (garantindo que o sqlalchemy entra)
 RUN pip install --no-cache-dir -r backend/requirements.txt
-
-# Copiar todo o código do projeto para dentro do container
-COPY . .
 
 # Definir o diretório de trabalho para dentro do backend onde está o src
 WORKDIR /app/backend
