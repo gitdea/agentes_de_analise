@@ -102,16 +102,20 @@ if st.button("Executar Análise com IA"):
                 API_URL = os.getenv("BACKEND_URL", "https://agentes-de-analise.onrender.com")
             
             try:
-                # Realiza a chamada HTTP para o backend FastAPI no Render
-                response = requests.post(f"{API_URL}/documents/analyze", files=files, data=data, timeout=120)
+                # Realiza a chamada HTTP para o backend FastAPI no Render com timeout alargado (300s)
+                response = requests.post(f"{API_URL}/documents/analyze", files=files, data=data, timeout=300)
                 
                 if response.status_code == 200:
                     result = response.json()
                     status.update(label="✅ Análise concluída com sucesso pelos agentes!", state="complete", expanded=False)
                     analysis_output = result.get("analysis_result", "Nenhuma resposta encontrada.")
                 else:
-                    status.update(label="❌ Erro na execução dos agentes.", state="error", expanded=True)
-                    analysis_output = f"Erro do servidor: {response.text}"
+                    status.update(label=f"❌ Erro no servidor (Código {response.status_code}).", state="error", expanded=True)
+                    # Se o Render retornar página HTML de erro (502, 503, etc.)
+                    if "<html" in response.text.lower() or response.status_code in [502, 503, 504]:
+                        analysis_output = "⚠️ **O servidor no Render está a reiniciar (modo sleep) ou encontrou um erro interno.** Aguarda uns segundos e clica novamente em executar."
+                    else:
+                        analysis_output = f"Erro do servidor: {response.text}"
                     
             except Exception as e:
                 status.update(label="❌ Falha de ligação ao backend.", state="error", expanded=True)
