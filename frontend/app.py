@@ -2,6 +2,7 @@
 import streamlit as st
 import requests
 import time
+import os
 
 # Configuração da página
 st.set_page_config(
@@ -94,9 +95,15 @@ if st.button("Executar Análise com IA"):
             files = {"file": (uploaded_file.name, uploaded_file.getvalue(), "application/pdf")}
             data = {"question": user_question}
             
+            # Obtém a URL da API (prioriza as Secrets do Streamlit Cloud, depois variáveis de ambiente, depois localhost)
+            try:
+                API_URL = st.secrets.get("API_URL", os.getenv("API_URL", "http://127.0.0.1:8000"))
+            except Exception:
+                API_URL = os.getenv("API_URL", "http://127.0.0.1:8000")
+            
             try:
                 # Realiza a chamada HTTP para o backend FastAPI
-                response = requests.post("http://127.0.0.1:8000/documents/analyze", files=files, data=data)
+                response = requests.post(f"{API_URL}/documents/analyze", files=files, data=data)
                 
                 if response.status_code == 200:
                     result = response.json()
@@ -108,7 +115,7 @@ if st.button("Executar Análise com IA"):
                     
             except Exception as e:
                 status.update(label="❌ Falha de ligação ao backend.", state="error", expanded=True)
-                analysis_output = f"Não foi possível conectar ao FastAPI em localhost:8000. Erro: {str(e)}"
+                analysis_output = f"Não foi possível conectar ao FastAPI em {API_URL}. Erro: {str(e)}"
 
         # RESPOSTA FINAL (Apresentada de forma limpa e visível abaixo) 
         if analysis_output:
@@ -117,4 +124,4 @@ if st.button("Executar Análise com IA"):
             st.markdown(analysis_output)
 
     else:
-        st.warning(" Por favor, envie um arquivo PDF e escreva uma pergunta antes de avançar.")
+        st.warning("⚠️ Por favor, envie um arquivo PDF e escreva uma pergunta antes de avançar.")

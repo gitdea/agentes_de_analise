@@ -84,7 +84,6 @@ def analyze_pdf_with_agents(
         if not file_bytes:
             raise HTTPException(status_code=400, detail="O ficheiro enviado está vazio.")
 
-        # 1. Executar o fluxo da equipa de agentes (CrewAI)
         analysis_result = AgentOrchestrator.run_analysis_workflow(file_bytes, question)
 
         resumo_str = str(analysis_result) if analysis_result else "Sem resumo gerado."
