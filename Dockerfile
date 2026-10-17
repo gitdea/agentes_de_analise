@@ -7,10 +7,11 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     tesseract-ocr \
+    tesseract-ocr-por \
     libtesseract-dev \
     poppler-utils \
     && rm -rf /var/lib/apt/lists/*
-
+    
 # Copiar todo o projeto
 COPY . /app
 

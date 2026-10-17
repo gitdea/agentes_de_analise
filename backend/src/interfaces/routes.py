@@ -1,11 +1,18 @@
 
+import io
 import os
 import json
 import gspread
+import pypdf
 from datetime import datetime
 from fastapi import APIRouter, HTTPException, UploadFile, File, Form
 from src.infrastructure.agent_service import AgentOrchestrator
 from src.infrastructure.database import SessionLocal, AnaliseModel, init_db
+
+# ALTERAÇÃO (limites da demonstração): como o link é público, qualquer pessoa pode enviar
+# um PDF enorme. Estes limites protegem o servidor gratuito do Render e a cota da Groq.
+MAX_BYTES = 10 * 1024 * 1024   # 10 MB
+MAX_PAGINAS = 100              # páginas do PDF
 
 router = APIRouter(prefix="/documents", tags=["Documents"])
 
@@ -80,11 +87,29 @@ def analyze_pdf_with_agents(
     """
     try:
         if not file.filename.lower().endswith(".pdf"):
-           raise HTTPException(status_code=400, detail="Apenas arquivos PDF são permitidos.")
-        file_bytes = file.file.read()
-        
+            raise HTTPException(status_code=400, detail="Apenas arquivos PDF são permitidos.")
+
+        # ALTERAÇÃO: lê no máximo MAX_BYTES + 1 bytes. Assim, um arquivo gigante não é carregado
+        # inteiro na memória só para descobrirmos depois que era grande demais.
+        file_bytes = file.file.read(MAX_BYTES + 1)
+
         if not file_bytes:
             raise HTTPException(status_code=400, detail="O ficheiro enviado está vazio.")
+
+        # ALTERAÇÃO: se leu mais que o limite, o arquivo passa de 10 MB.
+        # O código 413 significa "conteúdo grande demais".
+        if len(file_bytes) > MAX_BYTES:
+            raise HTTPException(status_code=413, detail="O arquivo passa de 10 MB, o limite da demonstração.")
+
+        # ALTERAÇÃO: conta as páginas antes de gastar tempo com OCR e IA. Se o PDF estiver
+        # corrompido ou protegido por senha, o pypdf dá erro e devolvemos 400 com mensagem clara.
+        try:
+            total_paginas = len(pypdf.PdfReader(io.BytesIO(file_bytes)).pages)
+        except Exception:
+            raise HTTPException(status_code=400, detail="Não foi possível ler o PDF. Ele pode estar corrompido ou protegido por senha.")
+
+        if total_paginas > MAX_PAGINAS:
+            raise HTTPException(status_code=413, detail=f"O PDF tem {total_paginas} páginas. O limite da demonstração é {MAX_PAGINAS}.")
 
         analysis_result = AgentOrchestrator.run_analysis_workflow(file_bytes, question)
 

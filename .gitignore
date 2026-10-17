@@ -16,3 +16,6 @@ __pycache__/
 # Ficheiros do Sistema
 .DS_Store
 Thumbs.db
+
+# Anotações de estudo (não enviar ao GitHub)
+explicação

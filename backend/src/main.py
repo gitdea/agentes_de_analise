@@ -3,9 +3,11 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from src.interfaces.routes import router as document_router
 
+# ALTERAÇÃO: a descrição agora bate com o que o código faz (o CrewAI não é usado). Os "agentes" são
+# três etapas de IA via Groq, e o RAG escolhe os trechos do documento por busca BM25.
 app = FastAPI(
     title="Agentes de Análise API",
-    description="API de multi-agentes (CrewAI + OCR) para análise inteligente de PDFs",
+    description="API de análise de PDFs com agentes de IA (Groq), OCR e busca de trechos relevantes (RAG)",
     version="1.0.0"
 )
 
@@ -23,8 +25,10 @@ app.include_router(document_router)
 
 @app.get("/")
 def root():
+    # ALTERAÇÃO: tirei "funcionar perfeitamente", porque esta rota só mostra que a API está no ar
+    # e não verifica o banco nem a Groq.
     return {
         "status": "online",
         "project": "Agentes de Análise",
-        "message": "API de multi-agentes a funcionar perfeitamente!"
+        "message": "API de análise de documentos no ar."
     }
